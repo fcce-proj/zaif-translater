@@ -82,6 +82,9 @@ celerybeat-schedule
 venv/
 ENV/
 
+# csv file
+csv/
+
 # Spyder project settings
 .spyderproject
 
