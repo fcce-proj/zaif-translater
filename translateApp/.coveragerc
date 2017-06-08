@@ -1,0 +1,3 @@
+[run]
+source = translateapp
+omit = translateapp/test*

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>Zizou</title>
+        <link rel="stylesheet" href="${request.static_url('translateapp:html/css/register.css')}"/>
+        <link rel="stylesheet" href="${request.static_url('translateapp:html/css/bootstrap.min.css')}"/>
+        <link rel="stylesheet" href="${request.static_url('translateapp:html/DataTables/datatables.min.css')}"/>
+        <script src="/html/DataTables/jQuery-1.12.4/jquery-1.12.4.min.js"></script>
+        <script src="/html/DataTables/datatables.min.js"></script>
+        <script src="/html/js/bootstrap.min.js"></script>
+        <script src="/html/js/register.js"></script>
+        <script src="/html/DataTables/datatables.min.js"></script>
+        <script>
+          $(function(){
+            $.extend( $.fn.dataTable.defaults, {
+              language: {
+                  url: "http://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json"
+              }
+            });
+            $("#table").DataTable();
+          });
+        </script>
+    </head>
+    <body>
+      <div class="main-content">
+        <div id="container1" class="container">
+          <div class="row">
+            <div tal:condition="exists:login_user" class="col-md-12 user-name text-center">${login_user.name}さん、ようこそ Zizou へ！</div>
+            <div tal:condition="exists:Phrase" class="col-md-12 user-name text-center">検索結果一覧</div>
+            <div tal:condition="exists:csv_data_list" class="col-md-12 user-name text-center">CSVファイル一覧</div>
+          </div>
+          <div class="row contents">
+            <div id="search" class="form col-md-3">
+              <form action='search' method="POST" name="form1">
+                <p class="form-title text-center">検索</p>
+                <div class="form-group">
+                  <input type="text" name="search" value="" id="search" class="form-control input-field">
+                </div>
+                <div class="form-group">
+                  <input type="submit" name="search.submitted" class="btn btn-primary center-block" value="検索" onclick="return checkForm1();">
+                </div>
+              </form>
+            </div>
+            <div id="register" class="form col-md-6">
+              <p class="form-title text-center">言語登録</p>
+              <div class="form-group">
+                <p>日本語<input type="text" name="ja" value="" id="register_ja" class="form-control" placeholder="ようこそ !"></p>
+              </div>
+              <div class="form-group">
+                <p>英語<input type="text" name="en" value="" id="register_en" class="form-control" placeholder="Welcome !"></p>
+              </div>
+              <div class="form-group">
+                <p>中国語<input type="text" name="zh" value="" id="register_zh" class="form-control" placeholder="欢迎 !"></p>
+              </div>
+              <div class="form-group submit-btn">
+                <input type="submit" value="登録" id="register_submit" class="btn btn-primary center-block">
+              </div>
+            </div>
+            <div id="csv" class="csv-form col-md-3">
+              <p class="form-title text-center">CSVアップロード</p>
+                <form method="POST" action="get_csv" accept-charset="utf-8" enctype="multipart/form-data" name="form2">
+                  <div class="form-group">
+                    <input type="file" name="csv" id="csv" class="center-block input-field" value="" size="30">
+                  </div>
+                  <div class="form-group">
+                    <input type="submit" value="アップロード" class="btn btn-primary center-block" onclick="return checkForm2();">
+                  </div>
+                </form>
+            </div>
+          </div>
+        </div>
+        <div id="container2" class="container">
+          <div class="row col-md-offset-2">
+            <div class="success-board">
+            </div>
+            <div class="failed-board">
+            </div>
+          </div>
+        </div>
+        <div id="container3" class="container language-list">
+          <div class="list1" tal:condition="exists:Language_list">
+            <table id="table" class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>key</th>
+                  <th>日本語</th>
+                  <th>英語</th>
+                  <th>中国語</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="Language_list" tal:repeat="langs Language_list" tal:condition="exists:Language_list">
+                  <td id="${langs.key_lang}">${langs.key_lang}</td>
+                  <td id="${langs.id}-ja" class="edit-btn ja-btn${langs.id}" data-theme="${langs.ja}">${langs.ja}</td>
+                  <td id="${langs.id}-en" class="edit-btn en-btn${langs.id}" data-theme="${langs.en}">${langs.en}</td>
+                  <td id="${langs.id}-zh" class="edit-btn zh-btn${langs.id}" data-theme="${langs.zh}">${langs.zh}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="list2" tal:condition="exists:Phrase">
+            <p>検索結果</p>
+            <table id="table" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>key</th>
+                  <th>日本語</th>
+                  <th>英語</th>
+                  <th>中国語</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="Phrase" tal:repeat="langs Phrase" tal:condition="exists:Phrase">
+                  <td id="${langs.key_lang}">${langs.key_lang}</td>
+                  <td id="${langs.id}-ja" class="edit-btn ja-btn${langs.id}" data-theme="${langs.ja}">${langs.ja}</td>
+                  <td id="${langs.id}-en" class="edit-btn en-btn${langs.id}" data-theme="${langs.en}">${langs.en}</td>
+                  <td id="${langs.id}-zh" class="edit-btn zh-btn${langs.id}" data-theme="${langs.zh}">${langs.zh}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="list3" tal:condition="exists:csv_data_list">
+            <table id="table" class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>key</th>
+                  <th>日本語</th>
+                  <th>英語</th>
+                  <th>中国語</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="csv_data_list" tal:repeat="langs csv_data_list" tal:condition="exists:csv_data_list">
+                  <td>${langs.key_lang}</td>
+                  <td>${langs.ja}</td>
+                  <td>${langs.en}</td>
+                  <td>${langs.zh}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="list4 col-md-3" tal:condition="exists:csv_data_error_list" style="margin-top: 30px; padding-left: 0;">
+            <table id="table" class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>登録できなかったkey一覧</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="csv_data_error_list" tal:repeat="langs csv_data_error_list" tal:condition="exists:csv_data_error_list">
+                  <td>${langs.err_msg}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="modal-overlay"></div>
+        <div id="modal-content">
+          <div class="form">
+              <div class="containessssr">
+                  <p class="form-title text-center">編集画面</p>
+                  <div id="editform1" class="form-group">
+                    <p>日本語</p><input type="text" name="edit_ja" value="" id="edit_ja" class="form-control">
+                  </div>
+                  <div id="editform2" class="form-group">
+                      <p>英語</p><input type="text" name="edit_en" value="" id="edit_en" class="form-control">
+                  </div>
+                  <div id="editform3" class="form-group">
+                    <p>中国語</p><input type="text" name="edit_zh" value="" id="edit_zh" class="form-control">
+                  </div>
+                  <div id="editform4" class="form-group">
+                    <input type="hidden" name="edit_id" value="" id="edit_id" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <input type="submit" value="変更" id="edit_submit" class="btn btn-primary center-block">
+                  </div>
+                <div id="modal-close" class="button-link center-block"><p id="modal-close-btn">閉じる</p></div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </body>
+</html>

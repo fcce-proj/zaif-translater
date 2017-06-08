@@ -1,0 +1,20 @@
+#login-form{
+	/*width:650px;
+  height:350px;*/
+	/*margin:1.5em auto 0;*/
+	padding-top: 100px;
+	background: #fff;
+  /*position: absolute;*/
+  /*position: fixed;*/
+  /*transform-origin: 50% 50%;*/
+}
+
+.form {
+	border:2px solid #aaa;
+	padding: 30px 30px;
+}
+
+#login-form .form-title {
+  color: #46bcf6;
+  font-size: 25px;
+}

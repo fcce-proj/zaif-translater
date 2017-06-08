@@ -1,0 +1,146 @@
+.main-content {
+  z-index:0;
+}
+
+
+/*header文言*/
+.user-name {
+  color: #46bcf6;
+  font-size: 25px;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  /*text-align: center;*/
+}
+
+
+/*コンテナ1*/
+#container1 .contents {
+  margin-top: 0px;
+}
+
+
+/*searchフォーム*/
+#search .input-field {
+  margin: 90px auto;
+}
+
+
+/*registerフォーム*/
+#register {
+  padding-left: 45px;
+}
+
+.form .form-title {
+  color: #46bcf6;
+  font-size: 25px;
+}
+
+
+/*csvフォーム*/
+.csv-form .form-title {
+  color: #46bcf6;
+  font-size: 25px;
+}
+
+#csv .input-field {
+  margin: 97px auto;
+  margin-left: 27px;
+}
+
+/*メッセージボード*/
+#container2 {
+  /*z-index:1;*/
+	/*display:none;*/
+	/*position:fixed;*/
+  position: absolute;
+  margin: 0 auto;
+}
+
+#container2 .success-board {
+  background-color: #337ab7;
+  /*height: 50px;
+  width: 660px;*/
+  /*width: 80%;*/
+  border-radius: 10px;
+  margin: 0 auto;
+  display:none;
+  z-index:1;
+  position: relative;
+}
+
+#container2 .failed-board {
+  background-color: #d950a2;
+  /*height: 50px;*/
+  /*width: 660px;*/
+  /*width: 80%;*/
+  border-radius: 10px;
+  margin: 0 auto;
+  display:none;
+  z-index:1;
+  position: relative;
+}
+
+
+/*テーブル*/
+#table {
+
+}
+
+#table thead {
+  background-color: #89cef0;
+}
+
+#table thead th {
+  color: #1c609a;
+}
+
+.language-list {
+  margin-top: 45px;
+}
+
+
+/*editモーダル*/
+#modal-content{
+  display:none;
+	width:650px;
+  height:380px;
+	margin:1.5em auto 0;
+	padding:10px 20px;
+	border:2px solid #aaa;
+	background:#fff;
+	z-index:2;
+  /*position: absolute;*/
+  position: fixed;
+  /*transform-origin: 50% 50%;*/
+}
+
+.modal-p{
+	margin-top:1em;
+}
+
+.modal-p:first-child{
+	margin-top:0;
+}
+
+#modal-close-btn {
+  width: 50px;
+  text-decoration:underline;
+  margin: 0 auto;
+}
+
+#modal-close-btn:hover {
+	cursor:pointer;
+	color:#f00;
+
+}
+
+#modal-overlay{
+	z-index:1;
+	display:none;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:120%;
+	/*background-color:rgba(0,0,0,0.75);*/
+}
