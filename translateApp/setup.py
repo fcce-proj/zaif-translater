@@ -20,6 +20,8 @@ requires = [
     'waitress',
     'gunicorn',
     'bcrypt',
+    'pandas',
+    'py-postgresql',
     ]
 
 tests_require = [
