@@ -7,14 +7,14 @@ import pandas as pd
 from sqlalchemy import create_engine, Integer, String
 from sqlalchemy.sql import select, text, bindparam, exists, func, and_, or_, not_
 from sqlalchemy.orm import sessionmaker
-from pyramid.view import view_config
+from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPFound,
     HTTPNotFound,
     )
 from pyramid.security import authenticated_userid
-from ..models.users import Users, Phrase
+from translateapp.models.users import Users, Phrase
 
 
 log = logging.getLogger(__name__)
@@ -103,45 +103,66 @@ def search(request):
         )
 
 
-@view_config(route_name='get_csv', request_method='POST', renderer='../templates/register.pt')
-def get_csv(request):
-    log.debug('+++++++++[get_csv]+++++++++')
-    filename = request.POST['csv'].filename
-    input_file = request.POST['csv'].file
-    file_path = os.path.join('translateapp/csv', '%s.csv' % uuid.uuid4())
-    temp_file_path = file_path + '~'
-    input_file.seek(0)
+@view_defaults(route_name='get_csv')
+class GetCsv:
+    def __init__(self, request):
+        self._request = request
 
-    with open(temp_file_path, 'wb') as output_file:
-        shutil.copyfileobj(input_file, output_file)
+    @view_config(request_method='POST', renderer='../templates/register.pt')
+    def get_csv(self):
+        log.debug('+++++++++[get_csv]+++++++++')
+        filename = self._request.POST['csv'].filename
+        input_file = self._request.POST['csv'].file
+        file_path = os.path.join('translateapp/csv', '%s.csv' % uuid.uuid4())
+        temp_file_path = file_path + '~'
+        input_file.seek(0)
 
-    os.rename(temp_file_path, file_path)
-    os.chdir("translateapp/csv")
-    csv_filename = str(file_path.replace('translateapp/csv/', ''))
-    csv_data = pd.read_csv(csv_filename)
-    csv_data_list = []
-    csv_data_error_list = []
+        with open(temp_file_path, 'wb') as output_file:
+            shutil.copyfileobj(input_file, output_file)
 
-    if not len(csv_data['key_lang']) == 0 and not len(csv_data['ja']) == 0 and not len(csv_data['en']) == 0 and not len(csv_data['zh']) == 0:
-        stop_loop = len(csv_data['key_lang'])
-        num = 0
-        while num < stop_loop:
-            Language_list_key = request.dbsession.query(Phrase).filter(Phrase.key_lang == csv_data['key_lang'][num]).all()
-            log.debug('+++++++++[get_csv test]+++++++++')
-            log.debug(Language_list_key)
-            csv_data_list.append({'key_lang': csv_data['key_lang'][num], 'ja': csv_data['ja'][num], 'en': csv_data['en'][num], 'zh': csv_data['zh'][num]})
-            if len(Language_list_key) == 0:
-                register_list = Phrase(key_lang=csv_data['key_lang'][num], ja=csv_data['ja'][num], en=csv_data['en'][num], zh=csv_data['zh'][num])
-                session.add(register_list)
-                log.debug('commit')
-            else:
-                csv_data_error_list.append({'err_msg': csv_data['key_lang'][num]})
-                log.debug('not commit')
-            num += 1
-        session.commit()
-    os.chdir("../..")
+        os.rename(temp_file_path, file_path)
+        os.chdir("translateapp/csv")
+        csv_filename = str(file_path.replace('translateapp/csv/', ''))
+        csv_data = pd.read_csv(csv_filename)
+        csv_data_list = []
+        csv_data_error_list = []
+        os.chdir("../..")
 
-    return dict(
-        csv_data_list=csv_data_list,
-        csv_data_error_list = csv_data_error_list
-        )
+        if self._check_csv_columname(csv_data, csv_data_list) is False:
+            return dict(
+                csv_data_list=csv_data_list,
+                csv_data_error_list=''
+                )
+
+        self._csv_commit(csv_data, csv_data_list, csv_data_error_list)
+
+        return dict(
+            csv_data_list=csv_data_list,
+            csv_data_error_list=csv_data_error_list
+            )
+
+    def _check_csv_columname(self, csv_data, csv_data_list):
+        if csv_data.columns[0] == 'key_lang' and csv_data.columns[1] == 'ja' and csv_data.columns[2] == 'en' and csv_data.columns[3] == 'zh':
+            return True
+        else:
+            csv_data_list.append({'key_lang': '添付ファイルのカラム名が正しくありません 正しくは: key_lang', 'ja': 'ja', 'en': 'en', 'zh': 'zh'})
+            return False
+
+    def _csv_commit(self, csv_data, csv_data_list, csv_data_error_list):
+        if not len(csv_data['key_lang']) == 0 and not len(csv_data['ja']) == 0 and not len(csv_data['en']) == 0 and not len(csv_data['zh']) == 0:
+            stop_loop = len(csv_data['key_lang'])
+            num = 0
+            while num < stop_loop:
+                Language_list_key = self._request.dbsession.query(Phrase).filter(Phrase.key_lang == csv_data['key_lang'][num]).all()
+                log.debug('+++++++++[get_csv test]+++++++++')
+                csv_data_list.append({'key_lang': csv_data['key_lang'][num], 'ja': csv_data['ja'][num], 'en': csv_data['en'][num], 'zh': csv_data['zh'][num]})
+                if len(Language_list_key) == 0 and not csv_data['key_lang'][num] != csv_data['key_lang'][num] and not csv_data['ja'][num] != csv_data['ja'][num] and not csv_data['en'][num] != csv_data['en'][num] and not csv_data['zh'][num] != csv_data['zh'][num]:
+                    '''nanの判定'''
+                    register_list = Phrase(key_lang=csv_data['key_lang'][num], ja=csv_data['ja'][num], en=csv_data['en'][num], zh=csv_data['zh'][num])
+                    session.add(register_list)
+                    log.debug('commit')
+                else:
+                    csv_data_error_list.append({'err_msg': csv_data['key_lang'][num]})
+                    log.debug('not commit')
+                num += 1
+            session.commit()
