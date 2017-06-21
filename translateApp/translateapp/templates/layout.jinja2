@@ -32,9 +32,6 @@
           <a href="{{ request.route_url('login') }}">Login</a>
         </p>
         {% else %}
-          <p class="pull-right">
-            {{request.user.name}} <a href="{{request.route_url('logout')}}">Logout</a>
-          </p>
         {% endif %}
         <div class="row">
           <div class="col-md-2">
