@@ -15,7 +15,7 @@ class Users(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
-    adress = Column(Text, nullable=False)
+    email = Column(Text, nullable=False)
     password_hash = Column(Text, nullable=False)
 
     def set_password(self, pw):
