@@ -1,9 +1,8 @@
 import json
-import hashlib
 import logging
 from pyramid.response import Response
 from pyramid.view import view_config, forbidden_view_config
-from ..models.users import Users, Phrase
+from ..models.models import Users, Phrase
 from pyramid.security import (
     remember,
     forget,
@@ -13,34 +12,41 @@ from pyramid.httpexceptions import (
     HTTPFound,
     HTTPNotFound,
     )
+from pyramid.security import authenticated_userid
+from ..security import (
+    hash_password,
+    check_password
+    )
+
 
 log = logging.getLogger(__name__)
 
 
 @view_config(route_name='login', request_method='GET', renderer='../templates/login.pt')
-def loginlo(request):
+def login_log(request):
     log.debug('+++++++++[login get]+++++++++')
     return {}
 
 
 @view_config(route_name='login', request_method='POST', renderer='json')
 def login(request):
+    userid = authenticated_userid(request)
     log.debug('+++++++++[login post]+++++++++')
     login_model = request.dbsession.query(Users).filter(Users.name == request.params['name']).first()
-    type_password = request.params['password']
-    checkPass = createHash(login_model.password_hash.encode('utf-8'))
-    password = createHash(type_password.encode('utf-8'))
+    input_password = request.params['password']
+    hashed_pw = login_model.password
 
-    if login_model is not None and checkPass == password:
+    if login_model and check_password(input_password, hashed_pw):
         log.debug('login success')
-        headers = remember(request, login_model.id)
+        headers = remember(request, login_model.id, max_age='86400')
         return Response(json.dumps({'query': 'register'}), headers=headers)
     else:
         log.debug('login failed')
         return Response()
 
-def createHash(password):
-    hashObj = hashlib.sha1()
-    hashObj.update(password)
 
-    return hashObj.hexdigest()
+@view_config(route_name='logout')
+def logout(request):
+    headers = forget(request)
+    url = request.route_url('login')
+    return HTTPFound(location=url, headers=headers)
