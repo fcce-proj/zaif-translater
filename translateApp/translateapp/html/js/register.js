@@ -2,16 +2,19 @@ $(function(){
   $(document).on('click','.edit-btn', function(arg1){
     var click_id_name =  arg1.target.id;
     var id_name_id = click_id_name.replace(/(-[a-z]{2})/g,'');
+    var id_name_key = click_id_name.replace(/([a-z]{2})/g,'kl');
     var id_name_ja = click_id_name.replace(/([a-z]{2})/g,'ja');
     var id_name_en = click_id_name.replace(/([a-z]{2})/g,'en');
     var id_name_zh = click_id_name.replace(/([a-z]{2})/g,'zh');
 
+    var td_key = $("#"+ id_name_key).text();
     var td_ja = $("#"+ id_name_ja).text();
     var td_en = $("#"+ id_name_en).text();
     var td_zh = $("#"+ id_name_zh).text();
 
 
     $(':hidden[name="edit_id"]').val(id_name_id);
+    $(':text[name="edit_key"]').val(td_key);
     $(':text[name="edit_ja"]').val(td_ja);
     $(':text[name="edit_en"]').val(td_en);
     $(':text[name="edit_zh"]').val(td_zh);
@@ -29,8 +32,6 @@ $(function(){
   function centeringModal(){
   	var w = $(window).width();
   	var h = $(window).height();
-  	// var cw = $("#modal-content").outerWidth({margin:true});
-  	// var ch = $("#modal-content").outerHeight({margin:true});
   	var pxleft = w / 2 - 347;
   	var pxtop = h / 2- 184;
 
@@ -64,10 +65,10 @@ $(function(){
 
   // 編集のajax
   $("#edit_submit").on('click', function(){
-    var params = {'edit_id': $('#edit_id').val(), 'edit_ja': $('#edit_ja').val(), 'edit_en': $('#edit_en').val(), 'edit_zh': $('#edit_zh').val()};
+    var params = {'edit_id': $('#edit_id').val(), 'edit_key': $('#edit_key').val(), 'edit_ja': $('#edit_ja').val(), 'edit_en': $('#edit_en').val(), 'edit_zh': $('#edit_zh').val()};
     var deferred = new $.Deferred();
 
-    if ($('#edit_ja').val() == '' || $('#edit_en').val() == '' || $('#edit_zh').val() == '' ) {
+    if ($('#edit_key').val() == '' || $('#edit_ja').val() == '' || $('#edit_en').val() == '' || $('#edit_zh').val() == '' ) {
       alert("フィールドに入力して下さい。");
       return false;
     }
