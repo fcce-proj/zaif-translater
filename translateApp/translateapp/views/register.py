@@ -14,7 +14,7 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
     )
 from pyramid.security import authenticated_userid
-from translateapp.models.users import Users, Phrase
+from translateapp.models.models import Users, Phrase
 
 
 log = logging.getLogger(__name__)
@@ -73,12 +73,14 @@ def register(request):
 def edit(request):
     log.debug('+++++++++[edit]+++++++++')
     edit_id = int(request.params['edit_id'])
+    key_lang = request.params['edit_key']
     japanese = request.params['edit_ja']
     english = request.params['edit_en']
     chinese = request.params['edit_zh']
     phrase_id = request.dbsession.query(Phrase).filter(Phrase.id == edit_id).first()
 
-    if phrase_id.ja != japanese or phrase_id.en != english or phrase_id.zh != chinese:
+    if phrase_id.key_lang != key_lang or phrase_id.ja != japanese or phrase_id.en != english or phrase_id.zh != chinese:
+        request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.key_lang: key_lang})
         request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.ja: japanese})
         request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.en: english})
         request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.zh: chinese})
