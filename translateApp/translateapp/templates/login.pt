@@ -21,7 +21,7 @@
             <p>パスワード<input type="password" id='password' class="form-control"></p>
           </div>
           <div class="form-group">
-            <input type="submit" id='submit' class="btn btn-primary center-block" value="送信">
+            <input type="submit" id='submit' class="btn btn-primary center-block" value="ログイン">
           </div>
         </div>
       </div>
