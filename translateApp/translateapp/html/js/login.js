@@ -17,17 +17,4 @@ $(function(){
    });
    return deferred;
   });
-
-  // centeringModalLogin()
-  function centeringModalLogin(){
-    	var w = $(window).width();
-    	var h = $(window).height();
-    	// var cw = $("#modal-content").outerWidth({margin:true});
-    	// var ch = $("#modal-content").outerHeight({margin:true});
-    	var pxleft = w / 2-150;
-    	var pxtop = h / 2-150;
-
-    	$("#login-formt").css({"left": pxleft, "top": pxtop});
-  };
-
 })
