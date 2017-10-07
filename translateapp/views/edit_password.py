@@ -3,7 +3,7 @@ import logging
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.security import authenticated_userid
-from ..models import User, Phrase
+from ..models import User
 from ..security import hash_password, check_password
 
 

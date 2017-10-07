@@ -1,6 +1,6 @@
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from .models import User, Phrase
+from .models import User
 import bcrypt
 
 
@@ -29,11 +29,13 @@ def includeme(config):
     config.add_request_method(get_user, 'user', reify=True)
 
 
+# will be remove
 def hash_password(pw):
     pwhash = bcrypt.hashpw(pw.encode('utf8'), bcrypt.gensalt())
     return pwhash.decode('utf8')
 
 
+# will be remove
 def check_password(pw, hashed_pw):
     expected_hash = hashed_pw.encode('utf8')
     return bcrypt.checkpw(pw.encode('utf8'), expected_hash)

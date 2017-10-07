@@ -5,32 +5,29 @@ from pyramid.view import view_config
 from ..models import User
 from pyramid.security import remember, forget
 from pyramid.httpexceptions import HTTPFound
-from ..security import check_password
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @view_config(route_name='login', request_method='GET', renderer='../templates/login.pt')
 def login_log(request):
-    log.debug('+++++++++[login get]+++++++++')
+    logger.debug('+++++++++[login get]+++++++++')
     return {}
 
 
 @view_config(route_name='login', request_method='POST', renderer='json')
 def login(request):
-    log.debug('+++++++++[login post]+++++++++')
+    logger.debug('+++++++++[login post]+++++++++')
     login_model = request.dbsession.query(User).filter(User.name == request.params['name']).first()
-    input_password = request.params['password']
-    hashed_pw = login_model.password
 
-    if login_model and check_password(input_password, hashed_pw):
-        log.debug('login success')
+    if login_model.check_password(request.params['password']):
+        logger.debug('login success')
         headers = remember(request, login_model.id, max_age='86400')
         return Response(json.dumps({'query': 'register'}), headers=headers)
-    else:
-        log.debug('login failed')
-        return Response()
+
+    logger.debug('login failed')
+    return Response()
 
 
 @view_config(route_name='logout')
