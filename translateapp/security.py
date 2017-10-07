@@ -1,6 +1,6 @@
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from .models.models import Users, Phrase
+from .models import User, Phrase
 import bcrypt
 
 
@@ -14,7 +14,7 @@ class MyAuthenticationPolicy(AuthTktAuthenticationPolicy):
 def get_user(request):
     user_id = request.unauthenticated_userid
     if user_id is not None:
-        user = request.dbsession.query(Users).get(user_id)
+        user = request.dbsession.query(User).get(user_id)
         return user
 
 

@@ -1,20 +1,14 @@
-import json
 import logging
 import os
 import uuid
 import shutil
 import pandas as pd
-from sqlalchemy import create_engine, Integer, String
-from sqlalchemy.sql import select, text, bindparam, exists, func, and_, or_, not_
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pyramid.view import view_config, view_defaults
-from pyramid.httpexceptions import (
-    HTTPForbidden,
-    HTTPFound,
-    HTTPNotFound,
-    )
+from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
-from translateapp.models.models import Users, Phrase
+from ..models import User, Phrase
 
 
 log = logging.getLogger(__name__)
@@ -29,7 +23,7 @@ session = Session()
 def register_view(request):
     log.debug('+++++++++[register get]+++++++++')
     userid = authenticated_userid(request)
-    login_user = request.dbsession.query(Users).filter(Users.id == userid).first()
+    login_user = request.dbsession.query(User).filter(User.id == userid).first()
     Language_list = request.dbsession.query(Phrase).all()
 
     if userid is None:
@@ -44,9 +38,6 @@ def register_view(request):
 @view_config(route_name='register', request_method='POST', renderer='json')
 def register(request):
     log.debug('+++++++++[register post]+++++++++')
-    userid = authenticated_userid(request)
-    login_user = request.dbsession.query(Users).filter(Users.id == userid).first()
-    Language_list = request.dbsession.query(Phrase).all()
     japanese = request.params['ja']
     english = request.params['en']
     chinese = request.params['zh']
@@ -66,8 +57,6 @@ def register(request):
         key=japanese,
         register_flag=register_flag,
         )
-
-
 
 @view_config(route_name='edit', request_method='POST', renderer='json')
 def edit(request):
