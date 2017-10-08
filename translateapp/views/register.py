@@ -3,20 +3,19 @@ import os
 import uuid
 import shutil
 import pandas as pd
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
-from ..models import User, Phrase
+
+from ..models import (
+    get_engine,
+    get_session_factory,
+    User,
+    Phrase,
+)
 
 
 log = logging.getLogger(__name__)
-
-url = 'postgresql+pypostgresql://pyramid_user:password@localhost/project_db'
-engine = create_engine(url, echo=True)
-Session = sessionmaker(bind=engine)
-session = Session()
 
 
 @view_config(route_name='register', renderer='../templates/register.pt')
@@ -24,15 +23,12 @@ def register_view(request):
     log.debug('+++++++++[register get]+++++++++')
     userid = authenticated_userid(request)
     login_user = request.dbsession.query(User).filter(User.id == userid).first()
-    Language_list = request.dbsession.query(Phrase).all()
 
-    if userid is None:
+    if login_user is None:
         return HTTPFound(location=request.route_url('login'))
 
-    return dict(
-        login_user=login_user,
-        Language_list=Language_list,
-        )
+    language_list = request.dbsession.query(Phrase).all()
+    return dict(login_user=login_user, Language_list=language_list)
 
 
 @view_config(route_name='register', request_method='POST', renderer='json')
@@ -41,57 +37,50 @@ def register(request):
     japanese = request.params['ja']
     english = request.params['en']
     chinese = request.params['zh']
-    Language = Phrase(key_lang=japanese, ja=japanese, en=english, zh=chinese)
-    Language_list_key = request.dbsession.query(Phrase).filter(Phrase.key_lang == japanese).all()
 
-    if japanese is not None and len(Language_list_key) == 0:
-        session.add(Language)
-        session.commit()
-        log.debug('commit')
-        register_flag = True
-    else:
-        register_flag = False
-        log.debug('not commit')
+    if japanese is None:
+        return dict(key=japanese, register_flag=False)
 
-    return dict(
-        key=japanese,
-        register_flag=register_flag,
-        )
+    phrases = request.dbsession.query(Phrase).filter(Phrase.key_lang == japanese).all()
+    if japanese in phrases:
+        log.debug('already registered: {}'.format(japanese))
+        return dict(key=japanese, register_flag=False)
+
+    new_phrase = Phrase(key_lang=japanese, ja=japanese, en=english, zh=chinese)
+    request.dbsession.add(new_phrase)
+    log.debug('registered: {}'.format(japanese))
+    return dict(key=japanese, register_flag=True)
+
 
 @view_config(route_name='edit', request_method='POST', renderer='json')
 def edit(request):
     log.debug('+++++++++[edit]+++++++++')
     edit_id = int(request.params['edit_id'])
-    key_lang = request.params['edit_key']
-    japanese = request.params['edit_ja']
-    english = request.params['edit_en']
-    chinese = request.params['edit_zh']
-    phrase_id = request.dbsession.query(Phrase).filter(Phrase.id == edit_id).first()
+    new_key_lang = request.params['edit_key']
+    new_japanese = request.params['edit_ja']
+    new_english = request.params['edit_en']
+    new_chinese = request.params['edit_zh']
 
-    if phrase_id.key_lang != key_lang or phrase_id.ja != japanese or phrase_id.en != english or phrase_id.zh != chinese:
-        request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.key_lang: key_lang})
-        request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.ja: japanese})
-        request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.en: english})
-        request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({Phrase.zh: chinese})
+    request.dbsession.query(Phrase).filter(Phrase.id == edit_id).update({
+        Phrase.key_lang: new_key_lang,
+        Phrase.ja: new_japanese,
+        Phrase.en: new_english,
+        Phrase.zh: new_chinese,
+    })
 
 
 @view_config(route_name='search', request_method='POST', renderer='../templates/register.pt')
 def search(request):
     log.debug('+++++++++[search]+++++++++')
     search_words = request.params['search']
-    Phrases = []
-    if len(Phrases) == 0:
-        Phrases = request.dbsession.query(Phrase).filter(Phrase.key_lang.ilike('%'+ search_words +'%')).all()
-        if len(Phrases) == 0:
-            Phrases = request.dbsession.query(Phrase).filter(Phrase.ja.ilike('%'+ search_words +'%')).all()
-            if len(Phrases) == 0:
-                Phrases = request.dbsession.query(Phrase).filter(Phrase.en.ilike('%'+ search_words +'%')).all()
-                if len(Phrases) == 0:
-                    Phrases = request.dbsession.query(Phrase).filter(Phrase.zh.ilike('%'+ search_words +'%')).all()
 
-    return dict(
-        Phrase=Phrases,
-        )
+    for key in ('key_lang', 'ja', 'en', 'zh'):
+        phrases = request.dbsession.query(Phrase).filter(
+            eval("Phrase." + key + ".ilike('%" + search_words + "%')")).all()
+        if phrases:
+            return dict(Phrase=phrases)
+
+    return dict(Phrase=[])
 
 
 @view_defaults(route_name='get_csv')
