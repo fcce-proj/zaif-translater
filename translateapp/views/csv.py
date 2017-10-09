@@ -19,9 +19,6 @@ class GetCsv:
     def __init__(self, request):
         self._request = request
 
-    def _save_csv(self):
-        pass
-
     @staticmethod
     def _create_csv(bytes_stream):
         def _get_path_name():

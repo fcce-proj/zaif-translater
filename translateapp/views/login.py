@@ -7,26 +7,26 @@ from pyramid.security import remember, forget
 from pyramid.httpexceptions import HTTPFound
 
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='login', request_method='GET', renderer='../templates/login.pt')
 def login_log(request):
-    logger.debug('+++++++++[login get]+++++++++')
+    log.debug('+++++++++[login get]+++++++++')
     return {}
 
 
 @view_config(route_name='login', request_method='POST', renderer='json')
 def login(request):
-    logger.debug('+++++++++[login post]+++++++++')
+    log.debug('+++++++++[login post]+++++++++')
     login_model = request.dbsession.query(User).filter(User.name == request.params['name']).first()
 
     if login_model.check_password(request.params['password']):
-        logger.debug('login success')
+        log.debug('login success')
         headers = remember(request, login_model.id, max_age='86400')
         return Response(json.dumps({'query': 'register'}), headers=headers)
 
-    logger.debug('login failed')
+    log.debug('login failed')
     return Response()
 
 
