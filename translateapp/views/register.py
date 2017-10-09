@@ -9,6 +9,7 @@ from ..models import User, Phrase
 log = logging.getLogger(__name__)
 
 
+@view_config(route_name='home', renderer='../templates/register.pt')
 @view_config(route_name='register', renderer='../templates/register.pt')
 def register_view(request):
     log.debug('+++++++++[register get]+++++++++')
