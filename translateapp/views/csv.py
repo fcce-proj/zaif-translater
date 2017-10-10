@@ -74,14 +74,25 @@ class GetCsv:
             )
 
         #  save phrases to database
+        # fixme: dirty code
+        dbsession = self._request.dbsession
         for key, row in csv_data_df.iterrows():
+            dict_row = dict(row)
             if '--' in row.values:
-                csv_data_error_list.append({'err_msg': dict(row)})
+                csv_data_error_list.append({'err_msg': dict_row})
                 continue
 
-            new_phrase = Phrase(**dict(row))
-            self._request.dbsession.add(new_phrase)
-            csv_data_list.append(dict(row))
+            existing = dbsession.query(Phrase).filter(Phrase.key_lang == row.key_lang).first()
+            if existing:
+                dbsession.query(Phrase).filter(Phrase.key_lang == row.key_lang).update({
+                    Phrase.key_lang: dict_row['key_lang'],
+                    Phrase.ja: dict_row['ja'],
+                    Phrase.en: dict_row['en'],
+                    Phrase.zh: dict_row['zh'],
+                })
+            else:
+                dbsession.add(Phrase(**dict_row))
+            csv_data_list.append(dict_row)
         return dict(
             csv_data_list=csv_data_list,
             csv_data_error_list=csv_data_error_list
