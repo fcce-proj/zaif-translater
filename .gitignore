@@ -84,7 +84,7 @@ venv/
 ENV/
 
 # csv file
-csv/
+*.csv
 
 # Spyder project settings
 .spyderproject
