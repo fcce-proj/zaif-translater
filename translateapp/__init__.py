@@ -2,6 +2,7 @@ from pyramid.config import Configurator
 from pyramid.session import SignedCookieSessionFactory
 my_session_factory = SignedCookieSessionFactory('itsaseekreet')
 
+
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """

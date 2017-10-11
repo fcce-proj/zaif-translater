@@ -91,3 +91,7 @@ csv/
 
 # Rope project settings
 .ropeproject
+
+translateApp.sqlite
+
+!.keep
